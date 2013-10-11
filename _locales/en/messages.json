@@ -1,0 +1,25 @@
+{
+    "QQcheck_name": {
+        "message": "Hello 8000"
+    },
+    "QQcheck_description": {
+        "message": "Send a warm greeting to 8000."
+    },
+    "QQcheck_node_error": {
+        "message": "Error: feed retrieved, but no &lt;fullcount&gt; node found"
+    },
+    "QQcheck_exception": {
+        "message": "exception: $1",
+        "placeholders": {
+            "1": {
+                "content": "$1"
+            }
+        }
+    },
+    "QQmsg_title": {
+        "message": "QQ-OA"
+    },
+    "QQmsg_content": {
+        "message": "hi $1, you have $2 unread msg"
+    }
+}

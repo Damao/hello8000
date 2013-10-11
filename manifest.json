@@ -1,0 +1,26 @@
+{
+	"version": "1.2.1",
+	"manifest_version": 2,
+	"default_locale": "zh_CN",
+	"description": "__MSG_QQcheck_description__",
+	"background": {
+		"scripts": ["background.js"]
+	},
+	"icons": {
+		"48": "img/QQ-logo_48.png"
+	},
+	"name": "__MSG_QQcheck_name__",
+	"permissions": [
+		"tabs",
+		"notifications",
+		"*://*/*"
+	],
+	"content_scripts": [
+		{
+			"matches": ["http://passport.oa.com/*"],
+			"js": ["passport.js"],
+			"run_at": "document_end"
+		}
+	]
+
+}
