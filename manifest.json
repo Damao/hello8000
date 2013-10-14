@@ -1,5 +1,5 @@
 {
-	"version": "1.2.1",
+	"version": "2.1.0",
 	"manifest_version": 2,
 	"default_locale": "zh_CN",
 	"description": "__MSG_QQcheck_description__",
@@ -11,8 +11,10 @@
 	},
 	"name": "__MSG_QQcheck_name__",
 	"permissions": [
+        "alarms",
 		"tabs",
 		"notifications",
+		"webRequest",
 		"*://*/*"
 	],
 	"content_scripts": [
