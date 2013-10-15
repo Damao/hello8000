@@ -71,8 +71,8 @@ function monitFucked() {
 function doFuckBack() {
     if (localStorage.fuckedURL != "") {
         chrome.tabs.create({url: strFuckBackURL, selected: false}, function () {
+            notification("某人在背后捅你刀子\n调用捅回去函数\n当前页如不能用请刷新\n"+localStorage.fuckedURL+'\n被8K拦截');
             localStorage.fuckedURL = "";
-            notification("某人在背后捅你刀子\n调用捅回去;函数\n30分钟后再检查身体");
             stopMonitFucked();
             console.log("stopMonitFucked()");
         });
@@ -160,7 +160,7 @@ function onInit() {
     monitFucked();
     if (!oldChromeVersion) {
         // (mpcomplete): We should be able to remove this now, but leaving it
-        // for a little while just to be sure the refresh alarm is working nicely.
+        // for a little while just to be sure the monit alarm is working nicely.
         chrome.alarms.create('watchdog', {periodInMinutes: 10});
     }
 }
