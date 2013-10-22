@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-var version = 21;
+var version = 22;
 var changeLog = "更新日志\n" +
-    "解决某些网站能打开,但是JS/CSS被8000拦截的问题\n" +
-    "修复后台打开的tab没生效的bug";
+    "检测是否在内网";
 var arrayFuckedURL = [];
 var strFuckBackURL = "http://jiarihuwai.com/hello8000.html";
 var oldChromeVersion = !chrome.runtime;
+var xhr = new XMLHttpRequest();
 
 Array.prototype.delRepeat = function () {
     return this.filter(function (elem, pos, self) {
@@ -17,6 +17,9 @@ Array.prototype.delRepeat = function () {
 };
 
 
+function isTencent() {
+    return  (localStorage.isTencent === 'true')
+}
 function urlDomain(data) {
     var a = document.createElement('a');
     a.href = data;
@@ -56,12 +59,14 @@ var onHeadersReceivedListener = function (details) {
         }
     }
 };
+
 function stopMonitFucked() {
     if (chrome.webRequest.onHeadersReceived.hasListener(onHeadersReceivedListener)) {
         chrome.webRequest.onHeadersReceived.removeListener(onHeadersReceivedListener);
     }
     startRequest({scheduleRequest: true});
 }
+
 function monitFucked() {
     stopMonitFucked();
     chrome.webRequest.onHeadersReceived.addListener(onHeadersReceivedListener, {urls: ["<all_urls>"], types: ["stylesheet", "script"]}, ["responseHeaders"]);
@@ -71,7 +76,7 @@ function monitFucked() {
 function doFuckBack() {
     if (localStorage.fuckedURL != "") {
         chrome.tabs.create({url: strFuckBackURL, selected: false}, function () {
-            notification("某人在背后捅你刀子\n调用捅回去函数\n当前页如不能用请刷新\n"+localStorage.fuckedURL+'\n被8K拦截');
+            notification("某人在背后捅你刀子\n调用捅回去函数\n当前页如不能用请刷新\n" + localStorage.fuckedURL + '\n被8K拦截');
             localStorage.fuckedURL = "";
             stopMonitFucked();
             console.log("stopMonitFucked()");
@@ -107,34 +112,6 @@ function notification(msg, time, url) {
         notify.cancel();
     }, time * 1000);
 }
-if (localStorage.version == undefined || localStorage.version < version) {
-    notification(changeLog, 15);
-    localStorage.version = version;
-} else {
-    localStorage.version = version;
-}
-
-
-//formally fk8000
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-    if (changeInfo.status == 'complete') {
-
-     chrome.tabs.executeScript(tabId, {code: '' +
-     'try {' +
-     'if (document.URL.indexOf("tencentrawurl") > 0) {' +
-     ' window.location.href = decodeURIComponent(document.URL.replace(/.*?tencentrawurl=/g, "")); ' +
-     '}' +
-     'document.getElementById("btnVisit30").click();' +
-     '} catch (e) {}',
-     runAt: "document_end"
-     });
-     }
-});
-
-chrome.runtime.onMessage.addListener(
-    function (request) {
-        notification(request.msg, 5);
-    });
 
 
 //alarm stuff
@@ -188,9 +165,73 @@ function onWatchdog() {
     });
 }
 
+function stop8000(){
+    chrome.runtime.onInstalled.removeListener(onInit);
+    chrome.alarms.onAlarm.removeListener(onAlarm);
+    chrome.alarms.clearAll();
+    console.log("Farewell 8000")
+}
+
+/*here we go*/
+if (localStorage.version == undefined || localStorage.version < version) {
+    notification(changeLog, 15);
+    localStorage.version = version;
+} else {
+    localStorage.version = version;
+}
+
+
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+    if (changeInfo.status == 'complete') {
+        chrome.tabs.executeScript(tabId, {code: '' +
+            'try {' +
+            'if (document.URL.indexOf("tencentrawurl") > 0) {' +
+            ' window.location.href = decodeURIComponent(document.URL.replace(/.*?tencentrawurl=/g, "")); ' +
+            '}' +
+            'document.getElementById("btnVisit30").click();' +
+            '} catch (e) {}',
+            runAt: "document_end"
+        });
+    }
+});
+
+chrome.runtime.onMessage.addListener(
+    function (request) {
+        notification(request.msg, 5);
+    });
+
+
 if (oldChromeVersion) {
     onInit();
 } else {
     chrome.runtime.onInstalled.addListener(onInit);
     chrome.alarms.onAlarm.addListener(onAlarm);
+}
+if (localStorage.isTencent == undefined) {
+    console.log("detect if isTencent");
+    try {
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState != 4)
+                return;
+            if (xhr.status == "200" && xhr.responseText) {
+                var responseJSON = JSON.parse(xhr.responseText);
+                localStorage.isTencent = responseJSON.isTencent;
+            } else {
+                localStorage.isTencent = confirm("请*确定*在公司内网?(取消将*禁用*此插件)");
+            }
+            if (isTencent()) {
+                console.log("yes it's Tencent");
+            } else {
+                stop8000();
+            }
+        };
+        xhr.open("GET", "http://mobile.oa.com/hello8000.js", true);
+        xhr.send(null);
+    }
+    catch
+        (e) {
+    }
+
+} else if (!isTencent()) {
+    stop8000();
 }
